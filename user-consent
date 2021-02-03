@@ -1,0 +1,50 @@
+    private void getConsent() {
+        ConsentInformation consentInformation = UserMessagingPlatform.getConsentInformation(this);
+        ConsentRequestParameters parameters = new ConsentRequestParameters.Builder()
+                .setTagForUnderAgeOfConsent(false)
+                .build();
+        consentInformation.requestConsentInfoUpdate(this, parameters, () -> {
+                    if (consentInformation.isConsentFormAvailable()) {
+                        // if user in EEA consent form become available
+                        // then show consent form
+                        showConsentForm();
+                    } else {
+                        // not in EEA
+                        // request ad normally
+                    }
+                },
+                formError -> {
+                    // handle error
+                }
+        );
+    }
+
+    private void showConsentForm() {
+        // call this method if consent available
+        UserMessagingPlatform.loadConsentForm(this, consentForm -> {
+                    this.myconsentForm = consentForm;
+                    if (consentInformation.getConsentStatus() == ConsentInformation.ConsentStatus.REQUIRED) {
+                        myconsentForm.show(MainActivity.this, formError -> showConsentForm());
+                    } else {
+                        // callback after user choose consent or not
+                        // do anything needed
+                    }
+                },
+                formError -> {
+                    // handle error
+                }
+        );
+    }
+    
+    private void loadAd() {
+        if (consentInformation.getConsentType() == ConsentInformation.ConsentType.NON_PERSONALIZED) {
+            Bundle extras = new Bundle();
+            extras.putString("npa", "1");
+            adRequest = new AdRequest.Builder()
+                 .addNetworkExtrasBundle(AdMobAdapter.class, extras)
+                 .build();
+        }
+        else {
+           adRequest = new AdRequest.Builder().build();
+        }
+    }
