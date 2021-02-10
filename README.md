@@ -1,3 +1,3 @@
 # admob-consent
 
-EEA User consent admob sdk
+How to make request user consent admob sdk android
